@@ -122,11 +122,18 @@ export class ClientConnection {
     this.connecting = true;
 
     this.ws.onerror = () => {
-      this.on_ws_close();
+      if (this.wisp_version === 2) {
+        this.ws.onclose = null;
+        this.cleanup();
+        this.wisp_version = 1;
+        this.connect_ws();
+        return;
+      }
+      this.cleanup();
       this.onerror();
     };
     this.ws.onclose = () => {
-      this.on_ws_close();
+      this.cleanup();
       this.onclose();
     };
     this.ws.onmessage = (event) => {
@@ -140,19 +147,6 @@ export class ClientConnection {
 
   close() {
     this.ws.close();
-  }
-
-  close_stream(stream, reason) {
-    stream.onclose(reason);
-    delete this.active_streams[stream.stream_id];
-  }
-
-  on_ws_close() {
-    this.connected = false;
-    this.connecting = false;
-    for (let stream_id of Object.keys(this.active_streams)) {
-      this.close_stream(this.active_streams[stream_id], 0x03);
-    }
   }
 
   create_stream(hostname, port, type=0x01) {
@@ -183,6 +177,11 @@ export class ClientConnection {
     return stream;
   }
 
+  close_stream(stream, reason) {
+    stream.onclose(reason);
+    delete this.active_streams[stream.stream_id];
+  }
+
   on_ws_msg(event) {
     let buffer = new WispBuffer(new Uint8Array(event.data));
     if (buffer.size < WispPacket.min_size) {
@@ -191,7 +190,6 @@ export class ClientConnection {
     }
     let packet = WispPacket.parse_all(buffer);
     let stream = this.active_streams[packet.stream_id];
-
     if (packet.stream_id === 0 && this.connecting) {
       if (packet.type === packet_types.CONTINUE) {
         this.max_buffer_size = packet.payload.buffer_remaining;
@@ -250,6 +248,14 @@ export class ClientConnection {
 
     else {
       console.warn(`wisp client warning: received an invalid packet of type ${packet.type}`);
+    }
+  }
+
+  cleanup() {
+    this.connected = false;
+    this.connecting = false;
+    for (let stream_id of Object.keys(this.active_streams)) {
+      this.close_stream(this.active_streams[stream_id], 0x03);
     }
   }
 }
