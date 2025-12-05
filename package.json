@@ -1,17 +1,17 @@
 {
   "name": "@mercuryworkshop/wisp-js",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "A client and server for the Wisp protocol, written in Javascript",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MercuryWorkshop/wisp-client-js.git"
+    "url": "git+https://github.com/MercuryWorkshop/wisp-js.git"
   },
   "author": "MercuryWorkshop",
   "license": "AGPL-3.0",
   "bugs": {
-    "url": "https://github.com/MercuryWorkshop/wisp-client-js/issues"
+    "url": "https://github.com/MercuryWorkshop/wisp-js/issues"
   },
-  "homepage": "https://github.com/MercuryWorkshop/wisp-client-js#readme",
+  "homepage": "https://github.com/MercuryWorkshop/wisp-js#readme",
   "main": "./src/index.mjs",
   "exports": {
     ".": {
